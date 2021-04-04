@@ -11,3 +11,14 @@
 <p>Para rodar, basta digitar o comando: >>>python3 game.py</p>
 
 <img src="/assets/rascunho1.png" alt="rascunhos pygame" />
+
+
+<p></p>
+
+<p>Músicas e sons:</p>
+<!-- <p>https://mixkit.co/free-sound-effects/game/</p> -->
+
+
+# Original music by Savfk (www.youtube.com/savfkmusic www.facebook.com/savfkmusic)
+# SOUNDS
+# https://mixkit.co/free-sound-effects/intro/?page=2
