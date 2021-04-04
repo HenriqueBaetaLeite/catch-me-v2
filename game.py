@@ -218,8 +218,8 @@ while running:
     if playing:
         # Para o modo contínuo devo acrescentar +=
         # Para o modo manual apenas atribuo o valor
-        player.rect.x = player.direction_x
-        player.rect.y = player.direction_y
+        player.rect.x = player.position_x
+        player.rect.y = player.position_y
 
         # Collision
         for ghost_prize in ghost_prize_group:
