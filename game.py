@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 import sys
 
+from menu_pygame import menu
+
 from time import sleep
 from random import randint, choice
 
@@ -30,7 +32,7 @@ FPS = 30
 
 # MUSIC AND SOUNDS
 pygame.mixer.music.load(choice(background_music))
-pygame.mixer.music.play(-1)  # -1 faz um loop com a música
+# pygame.mixer.music.play(-1)  # -1 faz um loop com a música
 pygame.mixer.music.set_volume(0.1)
 
 # Colors
@@ -53,12 +55,49 @@ ghost_prize_group = pygame.sprite.Group()
 bomb_group = pygame.sprite.Group()
 
 
+def create_fake_menu():
+    window.fill(BLACK)
+    font = pygame.font.SysFont("gabriola", 40)
+    title = font.render("Catch Me IF You Can!", False, WHITE)
+    titleRect = title.get_rect()
+    titleRect.center = (WIDTH // 2, 100)
+    window.blit(title, titleRect)
+
+    commands = font.render(
+        "m > change music | s > stop music | q > quit",
+        False,
+        WHITE,
+    )
+    commandsRect = commands.get_rect()
+    commandsRect.center = (20, 20)
+    window.blit(commands, (20, 440))
+
+    high_score_font = font.render(
+        "High Score " + str(player.high_score), False, RUST
+    )
+    high_scoreRect = high_score_font.get_rect()
+    high_scoreRect.center = (WIDTH // 2, HEIGHT // 2)
+    window.blit(high_score_font, high_scoreRect)
+
+    start_space = font.render(
+        "Press Space to start",
+        False,
+        (randint(0, 255), randint(0, 255), randint(0, 255)),
+    )
+    start_spaceRect = start_space.get_rect()
+    start_spaceRect.center = (WIDTH // 2, 400)
+    window.blit(start_space, start_spaceRect)
+
+
 def game_over():
-    pygame.mixer.music.fadeout(400)
+    pygame.mixer.music.fadeout(300)
     sleep(0.5)
     game_over_sound = pygame.mixer.Sound(choice(sounds_gameover))
     game_over_sound.play()
-    sleep(1.5)
+    # font = pygame.font.SysFont('arial', True)
+    # game_over_font = font.render('GAME OVER', True, RED)
+    # window.blit(game_over_font, (200, 200))
+    # sleep(1)
 
 
 def restart_game():
@@ -79,47 +118,32 @@ def create_bomb():
     bomb_group.add(bomb)
 
 
+def start_playing():
+    window.fill(WHITE)
+    font = pygame.font.SysFont("ebrima", 20)
+    score = font.render("Score: " + str(player.score), False, BLACK)
+    scoreRect = score.get_rect()
+    scoreRect.center = (WIDTH // 2, 50)
+    window.blit(score, scoreRect)
+    lifes = font.render("Life: " + str(player.lifes), False, BLACK)
+    window.blit(lifes, (5, 5))
+    player.move_yourself()
+    sprites_groups.update()
+    sprites_groups.draw(window)
+    ghost_prize_group.update()
+    ghost_prize_group.draw(window)
+    bomb_group.update()
+    bomb_group.draw(window)
+
+
 # redraw function
 def redraw():
     if playing:
-        window.fill(WHITE)
-        font = pygame.font.SysFont("ebrima", 20)
-        score = font.render("Score: " + str(player.score), False, BLACK)
-        scoreRect = score.get_rect()
-        scoreRect.center = (WIDTH // 2, 50)
-        window.blit(score, scoreRect)
-        lifes = font.render("Life: " + str(player.lifes), False, BLACK)
-        window.blit(lifes, (5, 5))
-        player.move_yourself()
-        sprites_groups.update()
-        sprites_groups.draw(window)
-        ghost_prize_group.update()
-        ghost_prize_group.draw(window)
-        bomb_group.update()
-        bomb_group.draw(window)
+        start_playing()
+       
     else:
-        window.fill(BLACK)
-        font = pygame.font.SysFont("gabriola", 40)
-        title = font.render("Catch Me IF You Can!", False, WHITE)
-        titleRect = title.get_rect()
-        titleRect.center = (WIDTH // 2, 100)
-        window.blit(title, titleRect)
-
-        high_score_font = font.render(
-            "High Score " + str(player.high_score), False, RUST
-        )
-        high_scoreRect = high_score_font.get_rect()
-        high_scoreRect.center = (WIDTH // 2, HEIGHT // 2)
-        window.blit(high_score_font, high_scoreRect)
-
-        start_space = font.render(
-            "Press Space to start",
-            False,
-            (randint(0, 255), randint(0, 255), randint(0, 255)),
-        )
-        start_spaceRect = start_space.get_rect()
-        start_spaceRect.center = (WIDTH // 2, 400)
-        window.blit(start_space, start_spaceRect)
+        # menu()
+        create_fake_menu()
 
     # pygame.display.flip()
     pygame.display.update()
@@ -133,7 +157,6 @@ def player_get_prize():
     ghost_prize = Prize()
     ghost_prize.move()
     prize.move()
-
     if len(ghost_prize_group) % 4 == 0 and player.score > 13:
         ghost_prize_group.empty()
 
@@ -143,6 +166,24 @@ def player_get_prize():
 
     if len(bomb_group) % 7 == 0 and player.score > 15:
         bomb_group.empty()
+
+
+def bomb_collided():
+    bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
+    bomb_sound.set_volume(0.4)
+    if bomb.rect.colliderect(prize.rect):
+        bomb.rect.x = randint(0, 600)
+        bomb.rect.y = randint(0, 400)
+    if bomb.rect.colliderect(player.rect):
+        player.lifes -= 1
+        player.score -= 2
+        bomb_sound.play()
+        bomb_group.remove(bomb)
+        if player.score > player.high_score:
+            player.high_score = player.score
+    if player.lifes <= 0:
+        game_over()
+        # playing = False
 
 
 # *****************************************************
@@ -187,32 +228,17 @@ while running:
             if ghost_prize.rect.colliderect(player.rect):
                 ghost_prize_sound.play()
                 ghost_prize.move()
+                create_bomb()
+                create_bomb()
 
         for bomb in bomb_group:
-            bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
-            bomb_sound.set_volume(0.4)
-            if bomb.rect.colliderect(prize.rect):
-                bomb.rect.x = randint(0, 600)
-                bomb.rect.y = randint(0, 400)
-            if bomb.rect.colliderect(player.rect):
-                player.lifes -= 1
-                player.score -= 2
-                bomb_sound.play()
-                bomb_group.remove(bomb)
-                if player.score > player.high_score:
-                    player.high_score = player.score
-                if player.lifes <= 0:
-                    game_over()
-                    playing = False
+            bomb_collided()
+            if player.lifes <= 0:
+                game_over()
+                playing = False
 
         if player.rect.colliderect(prize.rect):
             player_get_prize()
-
-        # if player.rect.collidepoint(50, 50):
-        #     player.rect.x = randint(0,600)
-        #     player.rect.y = randint(0,600)
-        #     print('bati')
-        #     print('...')
 
     else:
         if key[pygame.K_SPACE]:
