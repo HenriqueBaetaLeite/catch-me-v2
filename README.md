@@ -6,5 +6,6 @@
 <p>crie um ambiente virtual e execute o comando abaixo para instalar as dependências:</p>
 <span>-- As libs utilizadas são: pygame e pygame_menu --</span>
 <p>>>> python3 -m pip install -r requirements.txt</p>
+<p>Para rodar, basta digitar o comando: >>>python3 game.py</p>
 
 <img src="/assets/rascunho1.png" alt="rascunhos pygame" />

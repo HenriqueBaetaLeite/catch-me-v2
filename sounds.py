@@ -18,6 +18,8 @@ sounds_prize = [
     "assets/sounds/prize/jump.wav",
     "assets/sounds/prize/yoshi1.wav",
     "assets/sounds/prize/yoshi2.wav",
+    "assets/sounds/prize/coin.wav",
+    "assets/sounds/prize/health.wav",
 ]
 
 sounds_ghost_prize = [

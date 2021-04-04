@@ -145,6 +145,9 @@ def player_get_prize():
     ghost_prize = Prize()
     ghost_prize.move()
     prize.move()
+    if len(ghost_prize_group) == 4:
+        player.score -= 1
+
     if len(ghost_prize_group) % 4 == 0 and player.score > 13:
         ghost_prize_group.empty()
 
