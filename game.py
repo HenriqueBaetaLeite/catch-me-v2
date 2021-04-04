@@ -48,6 +48,7 @@ prize = Prize()
 
 # Sprite Groups
 sprites_groups = pygame.sprite.Group()
+
 sprites_groups.add(player, prize)
 
 ghost_prize_group = pygame.sprite.Group()
@@ -62,18 +63,9 @@ def create_fake_menu():
     titleRect = title.get_rect()
     titleRect.center = (WIDTH // 2, 100)
     window.blit(title, titleRect)
-
-    commands = font.render(
-        "m > change music | s > stop music | q > quit",
-        False,
-        WHITE,
-    )
-    commandsRect = commands.get_rect()
-    commandsRect.center = (20, 20)
-    window.blit(commands, (20, 440))
-
+    
     high_score_font = font.render(
-        "High Score " + str(player.high_score), False, RUST
+        f"High Score {player.high_score}", False, RUST
     )
     high_scoreRect = high_score_font.get_rect()
     high_scoreRect.center = (WIDTH // 2, HEIGHT // 2)
@@ -87,6 +79,15 @@ def create_fake_menu():
     start_spaceRect = start_space.get_rect()
     start_spaceRect.center = (WIDTH // 2, 400)
     window.blit(start_space, start_spaceRect)
+
+    commands = font.render(
+        "m > change music | s > stop music | q > quit",
+        False,
+        WHITE,
+    )
+    commandsRect = commands.get_rect()
+    commandsRect.center = (20, 20)
+    window.blit(commands, (20, 440))
 
 
 def game_over():
@@ -120,13 +121,13 @@ def create_bomb():
 
 def start_playing():
     window.fill(WHITE)
-    font = pygame.font.SysFont("ebrima", 20)
-    score = font.render("Score: " + str(player.score), False, BLACK)
+    font = pygame.font.SysFont("arial", 20)
+    score = font.render(f"Score: {player.score}", False, BLACK)
     scoreRect = score.get_rect()
     scoreRect.center = (WIDTH // 2, 50)
     window.blit(score, scoreRect)
-    lifes = font.render("Life: " + str(player.lifes), False, BLACK)
-    window.blit(lifes, (5, 5))
+    lifes = font.render(f"Lifes: {player.lifes}", False, BLACK)
+    window.blit(lifes, (8, 8))
     player.move_yourself()
     sprites_groups.update()
     sprites_groups.draw(window)
@@ -134,19 +135,6 @@ def start_playing():
     ghost_prize_group.draw(window)
     bomb_group.update()
     bomb_group.draw(window)
-
-
-# redraw function
-def redraw():
-    if playing:
-        start_playing()
-       
-    else:
-        # menu()
-        create_fake_menu()
-
-    # pygame.display.flip()
-    pygame.display.update()
 
 
 def player_get_prize():
@@ -186,6 +174,19 @@ def bomb_collided():
         # playing = False
 
 
+# redraw function
+def redraw():
+    if playing:
+        start_playing()
+
+    else:
+        # menu()
+        create_fake_menu()
+
+    # pygame.display.flip()
+    pygame.display.update()
+
+
 # *****************************************************
 # Main loop
 # *****************************************************
@@ -196,7 +197,7 @@ playing = False
 while running:
     # pygame.time.delay(60)
     frame_per_second.tick(FPS)
-
+    
     key = pygame.key.get_pressed()
 
     for event in pygame.event.get():
