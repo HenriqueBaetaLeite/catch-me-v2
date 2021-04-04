@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 from random import randint
 
+# from game import create_bomb
+
 BLACK = (0, 0, 0)
 width = 640
 height = 480
@@ -40,6 +42,9 @@ class Player(pygame.sprite.Sprite):
 
     def update_score(self):
         self.score += 1
+
+        # if self.score % 2 == 0:
+            # create_bomb()
 
         if self.score % 7 == 0:
             self.speed = 15

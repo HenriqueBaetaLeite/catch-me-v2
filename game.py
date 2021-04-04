@@ -9,7 +9,13 @@ from player import Player
 from bomb import Bomb
 from prize import Prize
 
-from sounds import background_music, sounds_prize, sounds_bomb, sounds_gameover
+from sounds import (
+    background_music,
+    sounds_prize,
+    sounds_bomb,
+    sounds_gameover,
+    sounds_ghost_prize,
+)
 
 pygame.init()
 
@@ -47,12 +53,31 @@ ghost_prize_group = pygame.sprite.Group()
 bomb_group = pygame.sprite.Group()
 
 
+def game_over():
+    pygame.mixer.music.fadeout(400)
+    sleep(0.5)
+    game_over_sound = pygame.mixer.Sound(choice(sounds_gameover))
+    game_over_sound.play()
+    sleep(1.5)
+
+
+def restart_game():
+    pygame.mixer.music.play()
+    bomb_group.empty()
+    ghost_prize_group.empty()
+    player.score = 0
+    player.lifes = 2
+    player.rect.x = WIDTH // 2
+    player.rect.y = WIDTH // 2
+
+
 def create_bomb():
     bomb = Bomb()
     bomb.update()
     bomb.rect.x = randint(0, 600)
-    bomb.rect.y = randint(0, 400)
+    bomb.rect.y = randint(50, 400)
     bomb_group.add(bomb)
+
 
 # redraw function
 def redraw():
@@ -80,12 +105,12 @@ def redraw():
         titleRect.center = (WIDTH // 2, 100)
         window.blit(title, titleRect)
 
-        high_score = font.render(
+        high_score_font = font.render(
             "High Score " + str(player.high_score), False, RUST
         )
-        high_scoreRect = high_score.get_rect()
+        high_scoreRect = high_score_font.get_rect()
         high_scoreRect.center = (WIDTH // 2, HEIGHT // 2)
-        window.blit(high_score, high_scoreRect)
+        window.blit(high_score_font, high_scoreRect)
 
         start_space = font.render(
             "Press Space to start",
@@ -100,31 +125,29 @@ def redraw():
     pygame.display.update()
 
 
-#
 def player_get_prize():
     collision_noise_prize = pygame.mixer.Sound(choice(sounds_prize))
-    collision_noise_prize.set_volume(0.2)
+    collision_noise_prize.set_volume(0.4)
     collision_noise_prize.play()
-
     player.update_score()
-
     ghost_prize = Prize()
-    ghost_prize.rect.x = randint(50, WIDTH - 50)
-    ghost_prize.rect.y = randint(50, HEIGHT - 50)
-
+    ghost_prize.move()
     prize.move()
 
-    if player.score % 6 == 0:
+    if len(ghost_prize_group) % 4 == 0 and player.score > 13:
         ghost_prize_group.empty()
-    
+
     if player.score % 2 == 0:
         ghost_prize_group.add(ghost_prize)
         create_bomb()
-        
+
     if len(bomb_group) % 7 == 0 and player.score > 15:
         bomb_group.empty()
 
+
+# *****************************************************
 # Main loop
+# *****************************************************
 
 running = True
 playing = False
@@ -159,8 +182,12 @@ while running:
 
         # Collision
         for ghost_prize in ghost_prize_group:
+            ghost_prize_sound = pygame.mixer.Sound(choice(sounds_ghost_prize))
+            ghost_prize_sound.set_volume(0.4)
             if ghost_prize.rect.colliderect(player.rect):
+                ghost_prize_sound.play()
                 ghost_prize.move()
+
         for bomb in bomb_group:
             bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
             bomb_sound.set_volume(0.4)
@@ -175,13 +202,7 @@ while running:
                 if player.score > player.high_score:
                     player.high_score = player.score
                 if player.lifes <= 0:
-                    pygame.mixer.music.fadeout(400)
-                    sleep(0.5)
-                    game_over_sound = pygame.mixer.Sound(
-                        choice(sounds_gameover)
-                    )
-                    game_over_sound.play()
-                    sleep(1.5)
+                    game_over()
                     playing = False
 
         if player.rect.colliderect(prize.rect):
@@ -196,13 +217,7 @@ while running:
     else:
         if key[pygame.K_SPACE]:
             playing = True
-            pygame.mixer.music.play()
-            bomb_group.empty()
-            ghost_prize_group.empty()
-            player.score = 0
-            player.lifes = 2
-            player.rect.x = WIDTH // 2
-            player.rect.y = WIDTH // 2
+            restart_game()
 
     redraw()
 

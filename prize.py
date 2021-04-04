@@ -10,7 +10,7 @@ height = 480
 class Prize(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface([10, 10])
+        self.image = pygame.Surface([randint(17, 23), 20])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.x = randint(50, width - 50)
