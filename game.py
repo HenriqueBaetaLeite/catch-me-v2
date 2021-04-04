@@ -1,9 +1,15 @@
 import pygame
 from pygame.locals import *
 import sys
+
+from time import sleep
 from random import randint, choice
 
 from player import Player
+from bomb import Bomb
+from prize import Prize
+
+from sounds import background_music, sounds_prize, sounds_bomb, sounds_gameover
 
 pygame.init()
 
@@ -12,51 +18,17 @@ height = 480
 
 window = pygame.display.set_mode((width, height))
 
-sprites_bomb = [
-    pygame.image.load("assets/bomb1.png"),
-    pygame.image.load("assets/bomb2.png"),
-    pygame.image.load("assets/bomb3.png"),
-]
-
 pygame.display.set_caption("Catch Me!")
 
 frame_per_second = pygame.time.Clock()
 FPS = 30
 
-background_music = choice(
-    [
-        "sounds/background_music/battle_boss.ogg",
-        "sounds/background_music/battle_normal.ogg",
-        "sounds/background_music/battle_special.ogg",
-        "sounds/background_music/game_scifi.ogg",
-        "sounds/background_music/grinding_hard.ogg",
-        "sounds/background_music/ready_50.ogg",
-        "sounds/background_music/rough.ogg",
-        "sounds/background_music/sci_fi_score.ogg",
-    ]
-)
+# MUSIC AND SOUNDS
 
-sounds_prize = choice(
-    [
-        "sounds/saber.wav",
-        "sounds/vision.wav",
-        "sounds/scifi.wav",
-        "sounds/retro_click.wav",
-    ]
-)
-
-musica_fundo = pygame.mixer.music.load(background_music)
+pygame.mixer.music.load(choice(background_music))
 pygame.mixer.music.play(-1)  # -1 faz um loop com a música
 pygame.mixer.music.set_volume(0.1)
 
-sounds_bomb = choice(["sounds/explosion.wav", "sounds/explosion2.wav"])
-
-bomb_sound = pygame.mixer.Sound(sounds_bomb)
-bomb_sound.set_volume(0.5)
-
-
-collision_noise_prize = pygame.mixer.Sound(sounds_prize)
-collision_noise_prize.set_volume(0.2)
 
 # Colors
 
@@ -65,44 +37,12 @@ BLACK = (0, 0, 0)
 RUST = (147, 58, 22)
 WHITE = (255, 255, 255)
 
-
-class Prize(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface([10, 10])
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-
-    def move(self):
-        prize.rect.x = randint(50, width - 50)
-        prize.rect.y = randint(50, height - 50)
-
-
-class Bomb(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        # self.image = pygame.Surface([20, 20])
-        # self.image.fill(RUST)
-        self.sprites = sprites_bomb
-        self.current_sprite = 0
-        self.image = self.sprites[self.current_sprite]
-        self.rect = self.image.get_rect()
-        self.is_animating = False
-
-    # def animate(self):
-    #     self.is_animating = True
-
-    def update(self):
-        self.current_sprite += 0.2
-        if self.current_sprite > len(self.sprites):
-            self.current_sprite = 0
-        self.image = self.sprites[int(self.current_sprite)]
-
+# Criação dos objetos Player e Prize
 
 player = Player()
 
-player.rect.x = width // 2
-player.rect.y = height // 2
+# player.rect.x = width // 2
+# player.rect.y = height // 2
 
 prize = Prize()
 prize.rect.x = randint(50, width - 50)
@@ -139,7 +79,6 @@ def redraw():
         ghost_prize_group.draw(window)
         bomb_group.update()
         bomb_group.draw(window)
-        # pygame.display.flip()
     else:
         window.fill(BLACK)
         font = pygame.font.SysFont("gabriola", 40)
@@ -164,32 +103,43 @@ def redraw():
         start_spaceRect.center = (width // 2, 400)
         window.blit(start_space, start_spaceRect)
 
+    # pygame.display.flip()
     pygame.display.update()
 
 
 def player_get_prize():
+    collision_noise_prize = pygame.mixer.Sound(choice(sounds_prize))
+    collision_noise_prize.set_volume(0.2)
     collision_noise_prize.play()
-    player.score += 1
-    if player.score % 7 == 0:
-        player.speed = 15
-    if player.score % 8 == 1:
-        player.speed = 5
-    else:
-        player.speed = 10
-    # print("Score: ", player.score)
+
+    player.update_score()
+
+    # player.score += 1
+
+    # if player.score % 7 == 0:
+    #     player.speed = 15
+    # elif player.score % 8 == 1:
+    #     player.speed = 5
+    # else:
+    #     player.speed = 10
+
     new_prize = Prize()
     new_prize.rect.x = randint(50, width - 50)
     new_prize.rect.y = randint(50, height - 50)
+
+    prize.move()
+    
+    bomb = Bomb()
+
     if player.score % 2 == 0:
         ghost_prize_group.add(new_prize)
     if player.score % 6 == 0:
         ghost_prize_group.empty()
-    prize.move()
-    bomb = Bomb()
-    bomb.update()
-    bomb.rect.x = randint(0, 600)
-    bomb.rect.y = randint(0, 400)
-    bomb_group.add(bomb)
+    if player.score % 2 == 0:
+        bomb.update()
+        bomb.rect.x = randint(0, 600)
+        bomb.rect.y = randint(0, 400)
+        bomb_group.add(bomb)
     if len(bomb_group) % 7 == 0 and len(ghost_prize_group) % 7 == 0:
         bomb_group.empty()
 
@@ -209,7 +159,17 @@ while running:
         if event.type == QUIT or key[pygame.K_q] or key[pygame.K_ESCAPE]:
             # running = False
             pygame.quit()
-            # sys.exit()
+            sys.exit()
+
+    if key[pygame.K_s]:
+        pygame.mixer.music.fadeout(1500)
+
+    if key[pygame.K_p]:
+        pygame.mixer.music.pause()
+
+    if key[pygame.K_m]:
+        pygame.mixer.music.load(choice(background_music))
+        pygame.mixer.music.play()
 
     if playing:
         # Para o modo contínuo devo acrescentar +=
@@ -219,16 +179,26 @@ while running:
 
         # Collision
         for bomb in bomb_group:
+            bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
+            bomb_sound.set_volume(0.4)
             if bomb.rect.colliderect(prize.rect):
                 bomb.rect.x = randint(0, 600)
                 bomb.rect.y = randint(0, 400)
             if bomb.rect.colliderect(player.rect):
                 player.lifes -= 1
+                player.score -= 2
                 bomb_sound.play()
                 bomb_group.remove(bomb)
                 if player.score > player.high_score:
                     player.high_score = player.score
                 if player.lifes <= 0:
+                    pygame.mixer.music.fadeout(400)
+                    sleep(0.5)
+                    game_over_sound = pygame.mixer.Sound(
+                        choice(sounds_gameover)
+                    )
+                    game_over_sound.play()
+                    sleep(1.5)
                     playing = False
 
         if player.rect.colliderect(prize.rect):
@@ -243,6 +213,7 @@ while running:
     else:
         if key[pygame.K_SPACE]:
             playing = True
+            pygame.mixer.music.play()
             bomb_group.empty()
             ghost_prize_group.empty()
             player.score = 0
@@ -253,3 +224,4 @@ while running:
     redraw()
 
 pygame.quit()
+sys.exit()

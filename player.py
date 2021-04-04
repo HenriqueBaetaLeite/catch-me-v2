@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.direction_y = randint(100, 350)
 
     # Aqui o jogador tem movimento constante e eu só preciso indicar a direção
+    # Também preciso mudar a configuração de direção manual ou não no "if playing:"
     def move(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
@@ -35,7 +36,18 @@ class Player(pygame.sprite.Sprite):
             self.direction_y = self.speed
             self.direction_x = 0
 
-    # Aqui eu movo o jogador da maneira q eu quero, se não mover, ele fica parado
+    def update_score(self):
+        self.score += 1
+
+        if self.score % 7 == 0:
+            self.speed = 15
+        elif self.score % 8 == 0 and self.score % 6 == 0:
+            self.speed = 6
+        else:
+            self.speed = 10
+
+    # Aqui eu movo o jogador da maneira q eu quero,
+    # se não mover, ele fica parado
     def moveYourself(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:

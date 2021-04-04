@@ -4,7 +4,7 @@
 <p>Para executar o jogo, faça o git clone do repositório,</p>
 <p>certifique-se de ter instalado o Python 3 em sua máquina,</p>
 <p>crie um ambiente virtual e execute o comando abaixo para instalar as dependências:</p>
-<span>-- Apenas a lib pygame é utilizada --</span>
+<span>-- As libs utilizadas são: pygame e pygame_menu --</span>
 <p>>>> python3 -m pip install -r requirements.txt</p>
 
-<img src="https://github.com/HenriqueBaetaLeite/meu-pygame/blob/main/rascunho1.png" alt="rascunhos pygame" />
+<img src="/assets/rascunho1.png" alt="rascunhos pygame" />
