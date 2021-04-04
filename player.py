@@ -3,6 +3,8 @@ from pygame.locals import *
 from random import randint
 
 BLACK = (0, 0, 0)
+width = 640
+height = 480
 
 
 class Player(pygame.sprite.Sprite):
@@ -48,7 +50,7 @@ class Player(pygame.sprite.Sprite):
 
     # Aqui eu movo o jogador da maneira q eu quero,
     # se não mover, ele fica parado
-    def moveYourself(self):
+    def move_yourself(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
             self.direction_x -= self.speed

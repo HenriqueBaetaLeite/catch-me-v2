@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 from random import randint
 
 RED = (194, 24, 7)
@@ -14,6 +13,8 @@ class Prize(pygame.sprite.Sprite):
         self.image = pygame.Surface([10, 10])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
+        self.rect.x = randint(50, width - 50)
+        self.rect.y = randint(50, height - 50)
 
     def move(self):
         self.rect.x = randint(50, width - 50)
