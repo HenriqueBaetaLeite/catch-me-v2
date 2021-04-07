@@ -13,20 +13,13 @@ sounds_prize = [
     "assets/sounds/prize/saber.wav",
     "assets/sounds/prize/vision.wav",
     "assets/sounds/prize/scifi.wav",
-    "assets/sounds/prize/retro_click.wav",
-    "assets/sounds/prize/fireball.wav",
-    "assets/sounds/prize/jump.wav",
-    "assets/sounds/prize/yoshi1.wav",
-    "assets/sounds/prize/yoshi2.wav",
-    "assets/sounds/prize/coin.wav",
-    "assets/sounds/prize/health.wav",
 ]
 
 sounds_ghost_prize = [
     "assets/sounds/ghost_prize/ghost_prize1.wav",
     "assets/sounds/ghost_prize/ghost_prize2.wav",
     "assets/sounds/ghost_prize/ghost_prize3.wav",
-    "assets/sounds/ghost_prize/ghost_prize4.wav",
+    # "assets/sounds/ghost_prize/ghost_prize4.wav",
 ]
 
 sounds_bomb = [

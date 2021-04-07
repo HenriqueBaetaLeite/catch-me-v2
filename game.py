@@ -2,9 +2,9 @@ import pygame
 from pygame.locals import *
 import sys
 
-from menu_pygame import menu
+# from menu_pygame import menu
 
-from time import sleep
+from time import sleep, time
 from random import randint, choice
 
 from player import Player
@@ -19,8 +19,10 @@ from sounds import (
     sounds_ghost_prize,
 )
 
+# INÍCIO DO PYGAME
 pygame.init()
 
+# DIMENSÕES DA TELA
 WIDTH = 640
 HEIGHT = 480
 
@@ -56,6 +58,7 @@ ghost_prize_group = pygame.sprite.Group()
 bomb_group = pygame.sprite.Group()
 
 
+# FUNÇÕES
 def create_fake_menu():
     window.fill(BLACK)
     font = pygame.font.SysFont("gabriola", 40)
@@ -63,9 +66,9 @@ def create_fake_menu():
     titleRect = title.get_rect()
     titleRect.center = (WIDTH // 2, 100)
     window.blit(title, titleRect)
-    
+
     high_score_font = font.render(
-        f"High Score {player.high_score}", False, RUST
+        f"Higher Level {player.high_score}", False, RUST
     )
     high_scoreRect = high_score_font.get_rect()
     high_scoreRect.center = (WIDTH // 2, HEIGHT // 2)
@@ -80,14 +83,14 @@ def create_fake_menu():
     start_spaceRect.center = (WIDTH // 2, 400)
     window.blit(start_space, start_spaceRect)
 
-    commands = font.render(
+    instructions = font.render(
         "m > change music | s > stop music | q > quit",
         False,
         WHITE,
     )
-    commandsRect = commands.get_rect()
-    commandsRect.center = (20, 20)
-    window.blit(commands, (20, 440))
+    instructionsRect = instructions.get_rect()
+    instructionsRect.center = (20, 20)
+    window.blit(instructions, (20, 440))
 
 
 def game_over():
@@ -95,9 +98,9 @@ def game_over():
     sleep(0.5)
     game_over_sound = pygame.mixer.Sound(choice(sounds_gameover))
     game_over_sound.play()
-    # font = pygame.font.SysFont('arial', True)
-    # game_over_font = font.render('GAME OVER', True, RED)
-    # window.blit(game_over_font, (200, 200))
+    font = pygame.font.SysFont("arial", 20)
+    game_over_font = font.render("GAME OVER", True, RED)
+    window.blit(game_over_font, (200, 200))
     # sleep(1)
 
 
@@ -105,29 +108,64 @@ def restart_game():
     pygame.mixer.music.play()
     bomb_group.empty()
     ghost_prize_group.empty()
-    player.score = 0
+    player.score = 5
     player.lifes = 2
+    player.level = 0
     player.rect.x = WIDTH // 2
     player.rect.y = WIDTH // 2
 
 
 def create_bomb():
     bomb = Bomb()
-    bomb.update()
-    bomb.rect.x = randint(0, 600)
-    bomb.rect.y = randint(50, 400)
+    bomb.bomb_animate()
+    bomb.bomb_position()
     bomb_group.add(bomb)
+
+
+def create_ghost_prize():
+    ghost_prize = Prize()
+    ghost_prize.move()
+    ghost_prize_group.add(ghost_prize)
+
+
+def bomb_collided():
+    bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
+    bomb_sound.set_volume(0.4)
+    if bomb.rect.colliderect(prize.rect):
+        bomb.rect.x = randint(0, 600)
+        bomb.rect.y = randint(0, 400)
+    if bomb.rect.colliderect(ghost_prize.rect):
+        bomb.rect.x = randint(0, 600)
+        bomb.rect.y = randint(0, 400)
+    if bomb.rect.colliderect(player.rect):
+        player.lifes -= 1
+        player.score += 2
+        bomb_sound.play()
+        bomb_group.remove(bomb)
+        create_bomb()
+        create_bomb()
+        if player.score > player.high_score:
+            player.high_score = player.level
 
 
 def start_playing():
     window.fill(WHITE)
     font = pygame.font.SysFont("arial", 20)
+
     score = font.render(f"Score: {player.score}", False, BLACK)
     scoreRect = score.get_rect()
-    scoreRect.center = (WIDTH // 2, 50)
+    scoreRect.center = (WIDTH // 2, 30)
     window.blit(score, scoreRect)
+
     lifes = font.render(f"Lifes: {player.lifes}", False, BLACK)
     window.blit(lifes, (8, 8))
+
+    level = font.render(f"Level: {player.level}", False, BLACK)
+    window.blit(level, (550, 8))
+
+    timer = font.render(f"Time: {count_down}", False, BLACK)
+    window.blit(timer, (550, 32))
+
     player.move_yourself()
     sprites_groups.update()
     sprites_groups.draw(window)
@@ -142,42 +180,30 @@ def player_get_prize():
     collision_noise_prize.set_volume(0.4)
     collision_noise_prize.play()
     player.update_score()
-    ghost_prize = Prize()
-    ghost_prize.move()
     prize.move()
     if len(ghost_prize_group) == 4:
-        player.score -= 1
+        player.score += 1
 
     if len(ghost_prize_group) % 4 == 0 and player.score > 13:
         ghost_prize_group.empty()
 
     if player.score % 2 == 0:
-        ghost_prize_group.add(ghost_prize)
+        create_ghost_prize()
         create_bomb()
 
     if len(bomb_group) % 7 == 0 and player.score > 15:
         bomb_group.empty()
 
 
-def bomb_collided():
-    bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
-    bomb_sound.set_volume(0.4)
-    if bomb.rect.colliderect(prize.rect):
-        bomb.rect.x = randint(0, 600)
-        bomb.rect.y = randint(0, 400)
-    if bomb.rect.colliderect(player.rect):
-        player.lifes -= 1
-        player.score -= 2
-        bomb_sound.play()
-        bomb_group.remove(bomb)
-        if player.score > player.high_score:
-            player.high_score = player.score
-    if player.lifes <= 0:
-        game_over()
-        # playing = False
+def changeLevel():
+    player.level += 1
+    player.score = 12
+    player.timer += 18
+    count_down = player.timer
+    bomb_group.empty()
+    ghost_prize_group.empty()
 
 
-# redraw function
 def redraw():
     if playing:
         start_playing()
@@ -194,18 +220,19 @@ def redraw():
 # Main loop
 # *****************************************************
 
+# start_time = time()
+count_down = player.timer
 running = True
 playing = False
 
 while running:
-    # pygame.time.delay(60)
     frame_per_second.tick(FPS)
-    
+
     key = pygame.key.get_pressed()
 
     for event in pygame.event.get():
         if event.type == QUIT or key[pygame.K_q] or key[pygame.K_ESCAPE]:
-            # running = False
+            running = False
             pygame.quit()
             sys.exit()
 
@@ -225,6 +252,14 @@ while running:
         player.rect.x = player.position_x
         player.rect.y = player.position_y
 
+        elapsed_time = time() - start_time
+        count_down = player.timer - int(elapsed_time)
+        print(count_down)
+
+        if count_down < 0:
+            game_over()
+            playing = False
+
         # Collision
         for ghost_prize in ghost_prize_group:
             ghost_prize_sound = pygame.mixer.Sound(choice(sounds_ghost_prize))
@@ -237,16 +272,20 @@ while running:
 
         for bomb in bomb_group:
             bomb_collided()
-            if player.lifes <= 0:
-                game_over()
-                playing = False
 
         if player.rect.colliderect(prize.rect):
             player_get_prize()
 
+        if player.score == 0:
+            changeLevel()
+
+        if player.lifes <= 0:
+            game_over()
+            playing = False
     else:
         if key[pygame.K_SPACE]:
             playing = True
+            start_time = time()
             restart_game()
 
     redraw()
