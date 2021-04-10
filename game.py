@@ -241,7 +241,11 @@ while running:
     key = pygame.key.get_pressed()
 
     for event in pygame.event.get():
-        if event.type == QUIT or key[pygame.K_q] or key[pygame.K_ESCAPE]:
+        if (
+            event.type == pygame.locals.QUIT
+            or key[pygame.K_q]
+            or key[pygame.K_ESCAPE]
+        ):
             running = False
             pygame.quit()
             sys.exit()
@@ -269,13 +273,6 @@ while running:
             game_over()
             playing = False
 
-        # Collision
-        for ghost_prize in ghost_prize_group:
-            ghost_prize_collision()
-
-        for bomb in bomb_group:
-            bomb_collision()
-
         if player.rect.colliderect(prize.rect):
             player_get_prize()
 
@@ -285,6 +282,13 @@ while running:
         if player.lifes == 0:
             game_over()
             playing = False
+
+        # Collision
+        for ghost_prize in ghost_prize_group:
+            ghost_prize_collision()
+
+        for bomb in bomb_group:
+            bomb_collision()
     else:
         if key[pygame.K_SPACE]:
             playing = True
