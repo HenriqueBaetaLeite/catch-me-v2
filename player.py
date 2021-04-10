@@ -14,9 +14,9 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(BLACK)
         self.rect = self.image.get_rect()
         self.lifes = 2
-        self.score = 25
+        self.score = 8
         self.level = 0
-        self.timer = 15
+        self.timer = 20
         self.high_score = 0
         self.speed = 10
         self.position_x = randint(100, 500)

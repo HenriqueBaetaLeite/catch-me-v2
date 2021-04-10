@@ -108,7 +108,7 @@ def restart_game():
     pygame.mixer.music.play()
     bomb_group.empty()
     ghost_prize_group.empty()
-    player.score = 5
+    # player.score = 5
     player.lifes = 2
     player.level = 0
     player.rect.x = WIDTH // 2
@@ -128,7 +128,17 @@ def create_ghost_prize():
     ghost_prize_group.add(ghost_prize)
 
 
-def bomb_collided():
+def ghost_prize_collision():
+    ghost_prize_sound = pygame.mixer.Sound(choice(sounds_ghost_prize))
+    ghost_prize_sound.set_volume(0.4)
+    if ghost_prize.rect.colliderect(player.rect):
+        ghost_prize_sound.play()
+        ghost_prize.move()
+        create_bomb()
+        create_bomb()
+
+
+def bomb_collision():
     bomb_sound = pygame.mixer.Sound(choice(sounds_bomb))
     bomb_sound.set_volume(0.4)
     if bomb.rect.colliderect(prize.rect):
@@ -195,7 +205,7 @@ def player_get_prize():
         bomb_group.empty()
 
 
-def changeLevel():
+def change_level():
     player.level += 1
     player.score = 12
     player.timer += 18
@@ -254,7 +264,6 @@ while running:
 
         elapsed_time = time() - start_time
         count_down = player.timer - int(elapsed_time)
-        print(count_down)
 
         if count_down < 0:
             game_over()
@@ -262,24 +271,18 @@ while running:
 
         # Collision
         for ghost_prize in ghost_prize_group:
-            ghost_prize_sound = pygame.mixer.Sound(choice(sounds_ghost_prize))
-            ghost_prize_sound.set_volume(0.4)
-            if ghost_prize.rect.colliderect(player.rect):
-                ghost_prize_sound.play()
-                ghost_prize.move()
-                create_bomb()
-                create_bomb()
+            ghost_prize_collision()
 
         for bomb in bomb_group:
-            bomb_collided()
+            bomb_collision()
 
         if player.rect.colliderect(prize.rect):
             player_get_prize()
 
         if player.score == 0:
-            changeLevel()
+            change_level()
 
-        if player.lifes <= 0:
+        if player.lifes == 0:
             game_over()
             playing = False
     else:
